@@ -7,10 +7,12 @@
 	$(function() {
 		$("#btn_modify_note").hide();
 	});
+
 	function get_note_info(note_id)
 	{
 		$("#btn_add_note").hide();
 		$("#btn_modify_note").show();
+		$("#note_header").text("Modify New Note");
 		$("#reset").trigger("click");
 		var modify_url = "<?= base_url('index.php/MyNote/get_note_info') ?>";
 		$.ajax({
@@ -76,7 +78,7 @@
 			myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5))
 		$("#btn_add_note").show();
 		$("#btn_modify_note").hide();
-
+		$("#note_header").text("Add New Note");
 	}
 </script>
 <div class="container-fluid">
@@ -122,7 +124,7 @@
 		<div class="col-md-7">
 			<div class="card">
 				<div class="card-header">
-					Add New Note
+					<span id="note_header">Add New Note</span>
 				</div>
 				<div class="card-body">
 					<form method="post" id="note_form">

@@ -104,8 +104,8 @@ class Note_model extends CI_Model
 	public function modify_note($data)
 	{
 		$this->db->trans_start();
-		$to_modify = $this->db->query("select schedule_id, location_id 
-									from Note where note_id=" . $data["note_id"]);
+		$to_modify_sql = "select schedule_id, location_id from Note where note_id= ? ";
+		$to_modify = $this->db->query($to_modify_sql, array($data["note_id"]));
 		$schedule_id = $to_modify->row()->schedule_id;
 		$location_id = $to_modify->row()->location_id;
 		$repetition = "";
@@ -126,7 +126,8 @@ class Note_model extends CI_Model
 			"post_time" => date("Y:m:d H:i:s"),
 			"permission" => $data['permission'],
 			"allow_comment" => $data['allow_comment'],), array('note_id' => $data['note_id']));
-		$this->db->query("delete from Note_Tag where note_id=" . $data['note_id']);
+		$to_delete_sql = "delete from Note_Tag where note_id= ? ";
+		$this->db->query($to_delete_sql, array($data['note_id']));
 		foreach ($data['tag_id'] as $tag_id) {
 			$this->db->insert(
 				'Note_Tag',
@@ -142,9 +143,10 @@ class Note_model extends CI_Model
 
 	public function get_my_Note()
 	{
-		$notes = $this->db->query("select *
+		$note_sql = "select *
 			from Note join Schedule using(schedule_id) join Location using (location_id)
-			where user_id = " . $this->session->userdata("user_id"));
+			where user_id = ?";
+		$notes = $this->db->query($note_sql, array($this->session->userdata("user_id")));
 		$data = array();
 		foreach ($notes->result() as $item) {
 			$note['note_id'] = $item->note_id;
@@ -160,7 +162,8 @@ class Note_model extends CI_Model
 			$note['permission'] = $item->permission;
 			$note['allow_comment'] = $item->allow_comment;
 			$note['repetition'] = $item->repetition;
-			$note['tag'] = $this->db->query("select tag_name from Note_Tag join Tag using(tag_id) where note_id=" . $item->note_id);
+			$tag_sql = "select tag_name from Note_Tag join Tag using(tag_id) where note_id=?";
+			$note['tag'] = $this->db->query($tag_sql, array($item->note_id));
 			array_push($data, $note);
 		};
 		return $data;
@@ -185,7 +188,8 @@ class Note_model extends CI_Model
 			$note['permission'] = $item->permission;
 			$note['allow_comment'] = $item->allow_comment;
 			$note['repetition'] = $item->repetition;
-			$note['tag'] = $this->db->query("select tag_name from Note_Tag join Tag using(tag_id) where note_id=" . $item->note_id);
+			$tag_sql = "select tag_name from Note_Tag join Tag using(tag_id) where note_id=?";
+			$note['tag'] = $this->db->query($tag_sql, array($item->note_id));
 			array_push($data, $note);
 		};
 		return $data;
@@ -195,7 +199,7 @@ class Note_model extends CI_Model
 	{
 		$note_search = $this->db->query("select *
 			from Note join Schedule using(schedule_id) join Location using(location_id)
-			where note_id=" . $note_id);
+			where note_id=?", array($note_id));
 		$item = $note_search->row();
 		$note['note_id'] = $item->note_id;
 		$note['radius'] = $item->radius;
@@ -210,7 +214,7 @@ class Note_model extends CI_Model
 		$note['permission'] = $item->permission;
 		$note['allow_comment'] = $item->allow_comment;
 		$note['repetition'] = $item->repetition;
-		$note['tag_id'] = $this->db->query("select tag_id from Note_Tag join Tag using(tag_id) where note_id=" . $item->note_id)->result_array();
+		$note['tag_id'] = $this->db->query("select tag_id from Note_Tag join Tag using(tag_id) where note_id=?", array($item->note_id))->result_array();
 		return $note;
 	}
 
@@ -219,13 +223,14 @@ class Note_model extends CI_Model
 		$this->db->trans_start();
 		$to_delete = $this->db->query("select schedule_id, location_id 
 									from Note join Schedule using (schedule_id) join Location using (location_id)
-									where note_id=" . $note_id);
+									where note_id=?", array($note_id));
 		$schedule_id = $to_delete->row()->schedule_id;
 		$location_id = $to_delete->row()->location_id;
-		$this->db->query("delete from Location where location_id=" . $location_id);
-		$this->db->query("delete from Schedule where schedule_id=" . $schedule_id);
-		$this->db->query("delete from Note where note_id=" . $note_id);
-		$this->db->query("delete from Note_Tag where note_id=" . $note_id);
+
+		$this->db->query("delete from Location where location_id=?", array($location_id));
+		$this->db->query("delete from Schedule where schedule_id=?", array($schedule_id));
+		$this->db->query("delete from Note where note_id=?", array($note_id));
+		$this->db->query("delete from Note_Tag where note_id=?", array($note_id));
 		$this->db->trans_complete();
 	}
 
