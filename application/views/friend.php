@@ -16,7 +16,7 @@
 						open_modal("#", "User doesn't exist", false);
 						break;
 					case 1:
-						open_modal("<?= base_url("index.php/Friend/add_friend/") ?>" + $("#inputSearch").val(), "Add Friend" ,true);
+						open_modal("<?= base_url("index.php/Friend/add_friend/") ?>" + $("#inputSearch").val(), "Add Friend", true);
 						break;
 					case 2:
 						open_modal("#", "Friend invitation already submitted.", false);
@@ -25,7 +25,7 @@
 						open_modal("#", "Already Friends.", false);
 						break;
 					case 4:
-						open_modal("<?= base_url("index.php/Friend/readd_friend/") ?>" + $("#inputSearch").val(), "Resubmit add friend invitation." ,true);
+						open_modal("<?= base_url("index.php/Friend/readd_friend/") ?>" + $("#inputSearch").val(), "Resubmit add friend invitation.", true);
 						break;
 					case 5:
 						open_modal("#", "Friend blocked.", false);
@@ -49,9 +49,18 @@
 		}
 		$('#delcfmModel').modal();
 	}
-	function urlSubmit(){
-		var url=$.trim($("#url").val());//获取会话中的隐藏属性URL
-		window.location.href=url;
+
+	function urlSubmit() {
+		var url = $.trim($("#url").val());//获取会话中的隐藏属性URL
+		window.location.href = url;
+	}
+
+	function accept_friend(id) {
+		window.location.href = "<?= base_url("index.php/Friend/accept_friend/")?>" + id;
+	}
+
+	function decline_friend(id) {
+		window.location.href = "<?= base_url("index.php/Friend/decline_friend/")?>" + id;
 	}
 
 </script>
@@ -93,26 +102,25 @@
 					Invitation Message
 				</div>
 				<div class="card-body">
-					<ul class="list-group">
-						<li class="list-group-item">
-							<span>[someone] wants to be your friend.</span>
-							<button style="float:right" class="btn btn-success" value="accept">Accept</button>
-							<button style="float:right;margin-right: 10px;" class="btn btn-danger" value="accept">
-								Decline
-							</button>
-						</li>
-						<li class="list-group-item">
-							<span>You invited [someone] as your friend</span>
-							<button style="float:right" class="btn btn-warning" value="accept">Cancel</button>
-						</li>
-						<li class="list-group-item">
-							123
-						</li>
-						<li class="list-group-item">
-							123
-						</li>
-					</ul>
-
+					<?php if ($invite_message->num_rows() == 0): ?>
+						<h3>No invitation message.</h3>
+					<?php else: ?>
+						<ul class="list-group">
+							<?php foreach ($invite_message->result() as $invite_message_row): ?>
+								<li class="list-group-item">
+									<span><?= $invite_message_row->user_name ?> wants to be your friend.</span>
+									<button style="float:right" class="btn btn-success" value="accept"
+											onclick="accept_friend(<?= $invite_message_row->user_id ?>)">Accept
+									</button>
+									<button style="float:right;margin-right: 10px;" class="btn btn-danger"
+											value="decline"
+											onclick="decline_friend(<?= $invite_message_row->user_id ?>)">
+										Decline
+									</button>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					<?php endif; ?>
 				</div>
 			</div>
 		</div>
@@ -124,7 +132,8 @@
 		<div class="modal-content message_align">
 			<div class="modal-header">
 				<h4 class="modal-title">Message</h4>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+						aria-hidden="true">×</span></button>
 			</div>
 			<div class="modal-body">
 				<p id="modal_info">confirm</p>
@@ -132,7 +141,9 @@
 			<div class="modal-footer">
 				<input type="hidden" id="url"/>
 				<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-				<button id="btn_modal_submit" onclick="urlSubmit()" class="btn btn-success" data-dismiss="modal">Confirm</button>
+				<button id="btn_modal_submit" onclick="urlSubmit()" class="btn btn-success" data-dismiss="modal">
+					Confirm
+				</button>
 			</div>
 		</div><!-- /.modal-content -->
 	</div><!-- /.modal-dialog -->

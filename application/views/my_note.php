@@ -4,12 +4,11 @@
 	}
 </style>
 <script>
-	$(function() {
+	$(function () {
 		$("#btn_modify_note").hide();
 	});
 
-	function get_note_info(note_id)
-	{
+	function get_note_info(note_id) {
 		$("#btn_add_note").hide();
 		$("#btn_modify_note").show();
 		$("#note_header").text("Modify New Note");
@@ -41,23 +40,22 @@
 				$("#lng").val(data['longitude']);
 				console.log(data);
 				console.log(data['tag_id']);
-				for(j = 0,len=data['tag_id'].length; j < len; j++) {
+				for (j = 0, len = data['tag_id'].length; j < len; j++) {
 					$("#inputTag option[value='" + data['tag_id'][j]['tag_id'] + "']").prop("selected", true);
 				}
-				for(j = 0, len = data['repetition'].length;j<len;j++) {
+				for (j = 0, len = data['repetition'].length; j < len; j++) {
 					console.log(data['repetition'].indexOf(j));
-					$("#inputRepeat option[value='"+ data['repetition'][j] +"']").prop("selected", true);
+					$("#inputRepeat option[value='" + data['repetition'][j] + "']").prop("selected", true);
 				}
 				// $("#inputTag").val(data['tag_id']);
-				var myLatlng = new google.maps.LatLng(data['latitude'],data['longitude']);
-				addNoteMap.addMarker(myLatlng, "name","<b>Location</b><br>" + myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5),
+				var myLatlng = new google.maps.LatLng(data['latitude'], data['longitude']);
+				addNoteMap.addMarker(myLatlng, "name", "<b>Location</b><br>" + myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5),
 					myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5))
 			} //成功执行方法
 		});
 	}
 
-	function delete_note(note_id)
-	{
+	function delete_note(note_id) {
 		window.location.href = "<?= base_url("index.php/MyNote/delete_note/") ?>" + note_id;
 	}
 
@@ -73,8 +71,8 @@
 
 	function show_add_note() {
 		$("#reset").trigger("click");
-		var myLatlng = new google.maps.LatLng(40.69289,-73.98488);
-		addNoteMap.addMarker(myLatlng, "name","<b>Location</b><br>" + myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5),
+		var myLatlng = new google.maps.LatLng(40.69289, -73.98488);
+		addNoteMap.addMarker(myLatlng, "name", "<b>Location</b><br>" + myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5),
 			myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5))
 		$("#btn_add_note").show();
 		$("#btn_modify_note").hide();
@@ -93,11 +91,15 @@
 					<ul class="list-group">
 						<?php foreach ($notes as $note_row): ?>
 							<li class="list-group-item">
-								<p>Start Date: <?= $note_row['start_date'] ?>, End Date: <?= $note_row['end_date'] ?></p>
-								<p>Start Time: <?= $note_row['start_time'] ?>, End Time: <?= $note_row['end_time'] ?></p>
+								<p>Start Date: <?= $note_row['start_date'] ?>, End
+									Date: <?= $note_row['end_date'] ?></p>
+								<p>Start Time: <?= $note_row['start_time'] ?>, End
+									Time: <?= $note_row['end_time'] ?></p>
 								<p>Repetition: <?= $note_row['repetition'] ?></p>
-								<p>Location Name: <?= $note_row['location_name'] ?>, Coordinate: (<?= $note_row['latitude'] ?>
-									,<?= $note_row['longitude'] ?>), Radius: within <?= $note_row['radius'] ?> meters</p>
+								<p>Location Name: <?= $note_row['location_name'] ?>, Coordinate:
+									(<?= $note_row['latitude'] ?>
+									,<?= $note_row['longitude'] ?>), Radius: within <?= $note_row['radius'] ?>
+									meters</p>
 								<p>Content: <?= $note_row['content'] ?></p>
 								<p>tags:
 									<?php foreach ($note_row['tag']->result() as $tag): ?>
@@ -113,8 +115,12 @@
 										echo "Nobody";
 									} ?>
 									, allow_comment:<?= $note_row['allow_comment'] == 0 ? "True" : "False" ?></p>
-								<button class="btn btn-warning" onclick="get_note_info(<?= $note_row['note_id'] ?>)">Modify</button>
-								<button class="btn btn-danger" onclick="delete_note(<?= $note_row['note_id'] ?>)">Delete</button>
+								<button class="btn btn-warning" onclick="get_note_info(<?= $note_row['note_id'] ?>)">
+									Modify
+								</button>
+								<button class="btn btn-danger" onclick="delete_note(<?= $note_row['note_id'] ?>)">
+									Delete
+								</button>
 							</li>
 						<?php endforeach; ?>
 					</ul>
@@ -217,9 +223,13 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<input type="reset" name="reset" id="reset" style="display: none;" />
-							<button type="button" class="btn btn-primary" id="btn_add_note" onclick="add_note()">Add New Note</button>
-							<button type="button" class="btn btn-primary" id="btn_modify_note" onclick="modify_note()">Modify Note</button>
+							<input type="reset" name="reset" id="reset" style="display: none;"/>
+							<button type="button" class="btn btn-primary" id="btn_add_note" onclick="add_note()">Add New
+								Note
+							</button>
+							<button type="button" class="btn btn-primary" id="btn_modify_note" onclick="modify_note()">
+								Modify Note
+							</button>
 						</div>
 					</form>
 				</div>

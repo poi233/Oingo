@@ -73,4 +73,35 @@ class Friend_model extends CI_Model
 		$this->db->query($sql, array($this->session->userdata("user_id"), $user1_id, $user2_id));
 	}
 
+	public function get_invite_message()
+	{
+
+		$user_id = $this->session->userdata("user_id");
+		$sql = "
+		  	select (case when user1_id = ? then user2_id else user1_id end) user_id,                        
+			(case when user1_id = ? then user2_name else user1_name end) user_name                  
+			from Friend                  
+			where (user1_id = ? or user2_id = ?) and status = 0 and action_user_id <> ?";
+		$message = $this->db->query($sql, array($user_id, $user_id, $user_id, $user_id, $user_id));
+		return $message;
+	}
+
+	public function accept_friend($user1_id, $user2_id)
+	{
+		if ($user1_id > $user2_id) {
+			$this->accept_friend($user2_id, $user1_id);
+		}
+		$sql = "update Friend set status=1 where user1_id=? and user2_id=?";
+		$this->db->query($sql, array($user1_id, $user2_id));
+	}
+
+	public function decline_friend($user1_id, $user2_id)
+	{
+		if ($user1_id > $user2_id) {
+			$this->decline_friend($user2_id, $user1_id);
+		}
+		$sql = "update Friend set status = 2 where user1_id=? and user2_id=?";
+		$this->db->query($sql, array($user1_id, $user2_id));
+	}
+
 }

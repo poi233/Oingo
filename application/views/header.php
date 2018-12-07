@@ -34,6 +34,7 @@
 	}
 </style>
 <body>
+<?php if ($this->session->userdata("user_id") == null) redirect("");  ?>
 <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #AFEEFF;margin-bottom:20px;">
 	<a class="navbar-brand" href="<?= base_url("index.php/Note") ?>"
 	   style="color: #1E90FF;font-size: 25px;"><b>Oingo</b></a>

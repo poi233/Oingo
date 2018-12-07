@@ -18,6 +18,7 @@ class Friend extends CI_Controller
 	{
 		$data['title'] = 'Friend';
 		$data['friends'] = $this->Friend_model->get_my_friends();
+		$data['invite_message'] = $this->Friend_model->get_invite_message();
 		$this->load->view('header', $data);
 		$this->load->view('friend', $data);
 		$this->load->view('footer');
@@ -51,5 +52,18 @@ class Friend extends CI_Controller
 		$this->Friend_model->readd_friend($user->row()->user_id, $this->session->userdata('user_id'));
 		redirect("Friend");
 	}
+
+	public function accept_friend($user_id)
+	{
+		$this->Friend_model->accept_friend($user_id, $this->session->userdata("user_id"));
+		redirect("Friend");
+	}
+
+	public function decline_friend($user_id)
+	{
+		$this->Friend_model->decline_friend($user_id, $this->session->userdata("user_id"));
+		redirect("Friend");
+	}
+
 
 }
