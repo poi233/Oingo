@@ -1,8 +1,3 @@
-<style>
-	.card-header {
-		background-color: #AFEEFF;
-	}
-</style>
 <script>
 	$(function () {
 		$("#btn_modify_note").hide();

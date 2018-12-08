@@ -53,7 +53,7 @@ class Friend_model extends CI_Model
 	public function add_friend($user1_id, $user2_id)
 	{
 		if ($user1_id > $user2_id) {
-			$this->add_friend($user2_id, $user1_id);
+			return $this->add_friend($user2_id, $user1_id);
 		}
 		$this->db->trans_start();
 		$get_name_sql = "select account from User where user_id=?";
@@ -67,7 +67,7 @@ class Friend_model extends CI_Model
 	public function readd_friend($user1_id, $user2_id)
 	{
 		if ($user1_id > $user2_id) {
-			$this->readd_friend($user2_id, $user1_id);
+			return $this->readd_friend($user2_id, $user1_id);
 		}
 		$sql = "update Friend set status=0, action_user_id=? where user1_id=? and user2_id=?";
 		$this->db->query($sql, array($this->session->userdata("user_id"), $user1_id, $user2_id));
@@ -89,7 +89,7 @@ class Friend_model extends CI_Model
 	public function accept_friend($user1_id, $user2_id)
 	{
 		if ($user1_id > $user2_id) {
-			$this->accept_friend($user2_id, $user1_id);
+			return $this->accept_friend($user2_id, $user1_id);
 		}
 		$sql = "update Friend set status=1 where user1_id=? and user2_id=?";
 		$this->db->query($sql, array($user1_id, $user2_id));
@@ -98,10 +98,18 @@ class Friend_model extends CI_Model
 	public function decline_friend($user1_id, $user2_id)
 	{
 		if ($user1_id > $user2_id) {
-			$this->decline_friend($user2_id, $user1_id);
+			return $this->decline_friend($user2_id, $user1_id);
 		}
 		$sql = "update Friend set status = 2 where user1_id=? and user2_id=?";
 		$this->db->query($sql, array($user1_id, $user2_id));
 	}
 
+	public function delete_friend($user1_id, $user2_id)
+	{
+		if ($user1_id > $user2_id) {
+			return $this->delete_friend($user2_id, $user1_id);
+		}
+		$sql = "delete from Friend where user1_id=? and user2_id = ?";
+		$this->db->query($sql, array($user1_id, $user2_id));
+	}
 }

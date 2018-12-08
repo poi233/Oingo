@@ -6,72 +6,40 @@
 <div class="container-fluid">
 	<div class="row">
 		<div class="col-lg-3">
-			<div class="card" id="filter_card">
-				<div class="card-header">
-					Filter
-				</div>
-				<div class="card-body">
-					<form>
-						<div class="form-row">
-							<div class="form-group col-md-6">
-								<label for="inputStartDate">Start Date</label>
-								<input type="date" class="form-control" id="inputStartDate" placeholder="Start Date">
-							</div>
-							<div class="form-group col-md-6">
-								<label for="inputEndDate">End Date</label>
-								<input type="date" class="form-control" id="inputEndDate" placeholder="End Date">
-							</div>
-						</div>
-						<div class="form-row">
-							<div class="form-group col-md-6">
-								<label for="inputStartTime">Start Time</label>
-								<input type="time" class="form-control" id="inputStartTime" placeholder="Start Date">
-							</div>
-							<div class="form-group col-md-6">
-								<label for="inputEndTime">End Time</label>
-								<input type="time" class="form-control" id="inputEndTime" placeholder="End Date">
-							</div>
-						</div>
-						<div class="form-row">
-							<div class="form-group col-md-4">
-								<label for="inputRadius">Radius</label>
-								<input type="text" class="form-control" id="inputRadius">
-							</div>
-							<div class="form-group col-md-4">
-								<label for="inputTag">Tag</label>
-								<select id="inputTag" class="form-control">
-									<option value="null">No Tag</option>
-									<option>...</option>
-								</select>
-							</div>
-						</div>
-						<div class="form-group">
-							<div class="form-check">
-								<input class="form-check-input" type="checkbox" id="gridCheck">
-								<label class="form-check-label" for="gridCheck">
-									Save as my filter
-								</label>
-							</div>
-						</div>
-						<div class="form-row">
-							<div class="col-md-6">
-								<button type="button" class="btn btn-primary">Select Location</button>
-							</div>
-							<div class="col-md-6">
-								<button type="button" class="btn btn-primary	">Add Filter</button>
-							</div>
-						</div>
-					</form>
-				</div>
-			</div>
-			<div class="card" style="margin-top: 10px;" id="active_filter_card">
+			<div class="card" id="active_filter_card">
 				<div class="card-header">
 					Active Filter
 				</div>
 				<div class="card-body">
 					<ul class="list-group">
-						<li class="list-group-item">Filter1</li>
-						<li class="list-group-item">Filter2</li>
+						<?php foreach ($active_filters as $filter_row): ?>
+							<li class="list-group-item">
+								<p>Start
+									Date: <?= $filter_row['start_date'] == null ? "NULL" : $filter_row['start_date'] ?>,
+									End
+									Date: <?= $filter_row['end_date'] == null ? "NULL" : $filter_row['end_date'] ?></p>
+								<p>Start
+									Time: <?= $filter_row['start_time'] == null ? "NULL" : $filter_row['start_time'] ?>,
+									End
+									Time: <?= $filter_row['end_time'] == null ? "NULL" : $filter_row['end_time'] ?></p>
+								<p>
+									Repetition: <?= $filter_row['repetition'] == null ? "NULL" : $filter_row['repetition'] ?></p>
+								<p>Coordinate: (<?= $filter_row['latitude'] ?>, <?= $filter_row['longitude'] ?>)</p>
+								<p>Radius:
+									within <?= $filter_row['radius'] == null ? "Unlimited" : $filter_row['radius'] ?>
+									meters</p>
+								<p>Tag: <?= $filter_row['tag_id'] == -1 ? "No tag" : $filter_row['tag'] ?></p>
+								<p>State: <?= $filter_row['state_id'] == -1 ? "No state" : $filter_row['state'] ?></p>
+								<p>From Who:
+									<?php if ($filter_row['from_who'] == 0) {
+										echo "All";
+									} else if ($filter_row['from_who'] == 1) {
+										echo "Friends";
+									} else {
+										echo "Nobody";
+									} ?></p>
+							</li>
+						<?php endforeach; ?>
 					</ul>
 				</div>
 			</div>
@@ -88,18 +56,18 @@
 				<div class="card-body">
 					<div>
 						<div>
-							<span id="locationText">My Location: (40.69289, -73.98488)</span>
+							<span id="locationText">My Location: (<?= $this->session->userdata("latitude") ?>
+								, <?= $this->session->userdata("longitude") ?>)</span>
 						</div>
 						<div>
-							<span id="dateText"><?= date("Y-m-d") ?></span>
-						</div>
-						<div>
-							<span id="timeText"><?= date("H:i:s") ?></span>
+							<span
+								id="dateText"><?= $this->session->userdata("current_time") ?></span>
 						</div>
 						<div>
 							<span id="stateText"><?= $current_state ?></span>
 						</div>
-						<button class="btn btn-primary" data-toggle="modal" data-target="#google_maps_api" style="margin-top: 5px;">Set My
+						<button class="btn btn-primary" data-toggle="modal" data-target="#google_maps_api"
+								style="margin-top: 5px;">Set My
 							Status
 						</button>
 					</div>
@@ -146,7 +114,9 @@
 				</select>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">OK</button>
+				<button type="button" id="btn_modal_ok" onclick="change_state()" class="btn btn-primary"
+						data-dismiss="modal" aria-hidden="true">OK
+				</button>
 			</div>
 		</div>
 	</div>
@@ -155,27 +125,21 @@
 <script>
 	$(document).ready(function () {
 		noteMap.initialize();
-		var myLatlng;
+		googleMap.initialize(<?= $this->session->userdata("latitude") ?>, <?= $this->session->userdata("longitude") ?>);
+		var myLatlng = new google.maps.LatLng(<?= $this->session->userdata("latitude") ?>, <?= $this->session->userdata('longitude') ?>);
+		noteMap.addMyMarker(myLatlng, "name", "<b>Location</b><br>" + myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5),
+			myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5));
+		$("#dateText").val("<?= $this->session->userdata("current_time")?>");
+		var noteLatLng;
 		<?php foreach($notes as $note_row): ?>
-		myLatlng = new google.maps.LatLng(<?= $note_row['latitude'] ?>,<?= $note_row['longitude'] ?>);
-		noteMap.addNoteMarker(myLatlng, <?= $note_row['note_id'] ?>, "<?= $note_row['content'] ?>");
+		noteLatLng = new google.maps.LatLng(<?= $note_row['latitude'] ?>,<?= $note_row['longitude'] ?>);
+		noteMap.addNoteMarker(noteLatLng, <?= $note_row['note_id'] ?>, "<?= $note_row['content'] ?>");
 		<?php endforeach; ?>
-
 	});
 
-</script>
-
-<script>
-	$("#google_maps_api").on("shown.bs.modal", function () {
-		googleMap.initialize();
-		$("#user_date").val("<?= date('Y-m-d') . 'T' . date('H:i:s')?>");
-		// googleMap.maps.event.trigger(map, "resize");
-	}).on('hide.bs.modal', function () { //关闭模态框
+	function change_state() {
 		var res = 'My Location: (' + googleMap.markers[0].getPosition().lat().toFixed(5) + ' , ' + googleMap.markers[0].getPosition().lng().toFixed(5) + ')';
 		$("#locationText").text(res);
-		$datetime = $("#user_date").val().toString();
-		$("#dateText").text($datetime.substr(0, $datetime.indexOf('T')));
-		$("#timeText").text($datetime.substr($datetime.indexOf('T') + 1, $datetime.length));
 		var url1 = "<?= base_url("index.php/Note/set_state") ?>";
 		$.ajax({
 			url: url1,
@@ -184,22 +148,31 @@
 				user_id: <?= $this->session->userdata("user_id") ?>,
 				state_id: $("#user_state").val(),
 				latitude: googleMap.markers[0].getPosition().lat().toFixed(5),
-				longitude: googleMap.markers[0].getPosition().lng().toFixed(5)
+				longitude: googleMap.markers[0].getPosition().lng().toFixed(5),
+				current_time: $("#user_date").val()
 			},
 			dataType: 'json',
 			error: function () {
 				alert("ajax error");
-			},  //错误执行方法
+			},
 			success: function (data) {
-				if (data == true)
-					$("#stateText").text($("#user_state").find("option:selected").text());
-				else
-					alert("set fail");
-			} //成功执行方法
+				window.location.href = "<?= base_url("index.php/Note") ?>";
+			}
 		});
 		var myLatlng = googleMap.markers[0].getPosition();
 		noteMap.addMyMarker(myLatlng, "name", "<b>Location</b><br>" + myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5),
 			myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5));
+	}
+
+</script>
+
+<script>
+	$("#google_maps_api").on("shown.bs.modal", function () {
+		googleMap.delMarker();
+		var myLatlng = new google.maps.LatLng(<?= $this->session->userdata("latitude") ?>, <?= $this->session->userdata('longitude') ?>);
+		googleMap.addMarker(myLatlng, "name", "<b>Location</b><br>" + myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5),
+			myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5));
+		$("#user_date").val("<?= $this->session->userdata("current_time")?>");
 	});
 </script>
 

@@ -34,7 +34,7 @@
 	}
 </style>
 <body>
-<?php if ($this->session->userdata("user_id") == null) redirect("");  ?>
+<?php if ($this->session->userdata("user_id") == null) redirect(""); ?>
 <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #AFEEFF;margin-bottom:20px;">
 	<a class="navbar-brand" href="<?= base_url("index.php/Note") ?>"
 	   style="color: #1E90FF;font-size: 25px;"><b>Oingo</b></a>
@@ -49,16 +49,20 @@
 				<a class="nav-link" href="<?= base_url("index.php/MyNote") ?>">Notes</a>
 			</li>
 			<li class="nav-item">
-				<a class="nav-link" href="<?= base_url("index.php/MyNote") ?>">Filters</a>
+				<a class="nav-link" href="<?= base_url("index.php/Filter") ?>">Filters</a>
 			</li>
 			<li class="nav-item dropdown">
 				<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
 				   aria-haspopup="true" aria-expanded="false">Friend
 				</a>
 				<div class="dropdown-menu" aria-labelledby="navbarDropdown">
-					<?php foreach($friends->result() as $friend_row): ?>
-					<a class="dropdown-item" href="#"><?= $friend_row->user_name ?></a>
-					<?php endforeach; ?>
+					<?php if ($friends->num_rows() == 0): ?>
+						<a class="dropdown-item"><b>No Friend</b></a>
+					<?php else: ?>
+						<?php foreach ($friends->result() as $friend_row): ?>
+							<a class="dropdown-item" href="#"><?= $friend_row->user_name ?></a>
+						<?php endforeach; ?>
+					<?php endif; ?>
 					<div class="dropdown-divider"></div>
 					<a class="dropdown-item" href="<?= base_url("index.php/Friend") ?>">Manage</a>
 				</div>

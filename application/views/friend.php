@@ -63,6 +63,10 @@
 		window.location.href = "<?= base_url("index.php/Friend/decline_friend/")?>" + id;
 	}
 
+	function delete_friend(id) {
+		window.location.href = "<?= base_url("index.php/Friend/delete_friend/")?>" + id;
+	}
+
 </script>
 <div class="container-fluid">
 	<div class="row justify-content-md-center">
@@ -85,13 +89,18 @@
 					</div>
 					<div style="margin-top:10px;">
 						<label><b>My Friends:</b></label>
-						<ul class="list-group">
-							<?php foreach ($friends->result() as $friend_row): ?>
-								<li class="list-group-item">
-									<?= $friend_row->user_name ?>
-								</li>
-							<?php endforeach; ?>
-						</ul>
+						<?php if($friends->num_rows() == 0): ?>
+							<h5>No Friends.</h5>
+						<?php else: ?>
+							<ul class="list-group">
+								<?php foreach ($friends->result() as $friend_row): ?>
+									<li class="list-group-item">
+										<?= $friend_row->user_name ?>
+										<button class="btn btn-danger" style="float:right;" onclick="delete_friend(<?= $friend_row->user_id ?>)">delete</button>
+									</li>
+								<?php endforeach; ?>
+							</ul>
+						<?php endif; ?>
 					</div>
 				</div>
 			</div>

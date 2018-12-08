@@ -11,7 +11,6 @@ class Friend extends CI_Controller
 	public function __construct()
 	{
 		parent::__construct();
-		$this->load->helper('url');
 	}
 
 	public function index()
@@ -62,6 +61,12 @@ class Friend extends CI_Controller
 	public function decline_friend($user_id)
 	{
 		$this->Friend_model->decline_friend($user_id, $this->session->userdata("user_id"));
+		redirect("Friend");
+	}
+
+	public function delete_friend($user_id)
+	{
+		$this->Friend_model->delete_friend($user_id, $this->session->userdata("user_id"));
 		redirect("Friend");
 	}
 

@@ -43,6 +43,9 @@ class User_model extends CI_Model
 	{
 		$this->db->update('User', array('state_id' => $data['state_id']), array('user_id' => $data['user_id']));
 		$this->session->set_userdata("state_id", $data['state_id']);
+		$this->session->set_userdata("longitude", $data['longitude']);
+		$this->session->set_userdata("latitude", $data['latitude']);
+		$this->session->set_userdata("current_time", $data['current_time']);
 	}
 
 	public function update_user_info($data)
@@ -66,6 +69,9 @@ class User_model extends CI_Model
 		$this->session->set_userdata('user_id', $row->user_id);
 		$this->session->set_userdata('state_id', $row->state_id);
 		$this->session->set_userdata('account', $row->account);
+		$this->session->set_userdata('current_time', date("Y-m-d H:i:s"));
+		$this->session->set_userdata('latitude', 40.69289);
+		$this->session->set_userdata('longitude', -73.98488);
 		$this->session->set_userdata('lastActiveTime', time());
 	}
 
@@ -88,11 +94,7 @@ class User_model extends CI_Model
 
 	public function logout()
 	{
-//		$data['user_id']=$this->session->userdata('user_id');
-		$this->session->unset_userdata('user_id');
-		$this->session->unset_userdata('state_id');
-		$this->session->unset_userdata('account');
-		$this->session->unset_userdata('lastActiveTime');
+		$this->session->sess_destroy();
 	}
 
 	public function register($data)
