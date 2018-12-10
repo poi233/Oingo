@@ -79,10 +79,10 @@
 				</div>
 				<div class="card-body">
 					<div>
-						<button class="btn btn-primary">Show All Notes</button>
+						<button class="btn btn-primary" onclick="show_all_notes()">Show All Notes</button>
 					</div>
 					<div style="margin-top: 10px;">
-						<button class="btn btn-primary">Show Filtered Notes</button>
+						<button class="btn btn-primary" onclick="show_filtered_notes()">Show Filtered Notes</button>
 					</div>
 
 				</div>
@@ -122,6 +122,62 @@
 	</div>
 </div>
 
+<div class="modal fade" id="note_modal" tabindex="-1" role="dialog"
+	 aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="noteModalLabel">Note</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-md-12">
+							<b>Location Name</b>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							This is the content of a note.
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-4">
+							publisher_name
+						</div>
+						<div class="col-md-offset-4">
+							<button type="button" class="btn-sm btn-success">Add Friend</button>
+						</div>
+					</div>
+					<div class="row">
+						<ul class="col-md-12 list-group">
+							<li class="list-group-item">comment1</li>
+							<li class="list-group-item">comment1</li>
+						</ul>
+					</div>
+					<div class="row">
+						<div class="col-md-9">
+							<input class="form-control" id="inputSearch" placeholder="Make comments">
+						</div>
+						<div class="col-md-3">
+							<button class="btn btn-primary" onclick="">Comment</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">
+					Close
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
 <script>
 	$(document).ready(function () {
 		noteMap.initialize();
@@ -130,10 +186,15 @@
 		noteMap.addMyMarker(myLatlng, "name", "<b>Location</b><br>" + myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5),
 			myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5));
 		$("#dateText").val("<?= $this->session->userdata("current_time")?>");
-		var noteLatLng;
 		<?php foreach($notes as $note_row): ?>
-		noteLatLng = new google.maps.LatLng(<?= $note_row['latitude'] ?>,<?= $note_row['longitude'] ?>);
-		noteMap.addNoteMarker(noteLatLng, <?= $note_row['note_id'] ?>, "<?= $note_row['content'] ?>");
+		var noteLatLng = new google.maps.LatLng(<?= $note_row['latitude'] ?>,<?= $note_row['longitude'] ?>);
+		var noteContent =
+			"<div>" +
+			"<b><?= $note_row['location_name'] ?></b><br/>" +
+			"<span><?= $note_row['content'] ?></span><br/>" +
+			"<a href='#' onclick='show_note_detail(<?= $note_row['note_id'] ?>)'>Show Details.</a>" +
+			"</div>";
+		noteMap.addNoteMarker(noteLatLng, <?= $note_row['note_id'] ?>, noteContent);
 		<?php endforeach; ?>
 	});
 
@@ -164,15 +225,54 @@
 			myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5));
 	}
 
+	function show_filtered_notes() {
+		$.each(noteMap.note_markers, function (i, val) {
+			val.setMap(null);
+		});
+		noteMap.note_markers = {};
+		<?php foreach($filtered_notes->result() as $note_row): ?>
+		var noteLatLng = new google.maps.LatLng(<?= $note_row->latitude ?>, <?= $note_row->longitude ?>);
+		var noteContent =
+			"<div>" +
+			"<b><?= $note_row->location_name ?></b><br/>" +
+			"<span><?= $note_row->content ?></span><br/>" +
+			"<a href='#' onclick='show_note_detail(<?= $note_row->note_id ?>)'>Show Details.</a>" +
+			"</div>";
+
+		noteMap.addNoteMarker(noteLatLng, <?= $note_row->note_id ?>, noteContent);
+		<?php endforeach; ?>
+	}
+
+	function show_all_notes() {
+		$.each(noteMap.note_markers, function (i, val) {
+			val.setMap(null);
+		});
+		noteMap.note_markers = {};
+		<?php foreach($notes as $note_row): ?>
+		var noteLatLng = new google.maps.LatLng(<?= $note_row['latitude'] ?>,<?= $note_row['longitude'] ?>);
+		var noteContent =
+			"<div>" +
+			"<b><?= $note_row['location_name'] ?></b><br/>" +
+			"<span><?= $note_row['content'] ?></span><br/>" +
+			"<a href='#' onclick='show_note_detail(<?= $note_row['note_id'] ?>)'>Show Details.</a>" +
+			"</div>";
+		noteMap.addNoteMarker(noteLatLng, <?= $note_row['note_id'] ?>, noteContent);
+		<?php endforeach; ?>
+	}
+
+	function show_note_detail(id) {
+		$("#note_modal").modal("show");
+	}
+
 </script>
 
 <script>
 	$("#google_maps_api").on("shown.bs.modal", function () {
+		$("#user_date").val("<?= $this->session->userdata("current_time")?>");
 		googleMap.delMarker();
 		var myLatlng = new google.maps.LatLng(<?= $this->session->userdata("latitude") ?>, <?= $this->session->userdata('longitude') ?>);
 		googleMap.addMarker(myLatlng, "name", "<b>Location</b><br>" + myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5),
 			myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5));
-		$("#user_date").val("<?= $this->session->userdata("current_time")?>");
 	});
 </script>
 

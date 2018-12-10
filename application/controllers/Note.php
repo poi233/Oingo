@@ -17,6 +17,7 @@ class Note extends CI_Controller
 		$data['notes'] = $this->Note_model->get_all_note();
 		$data['friends'] = $this->Friend_model->get_my_friends();
 		$data['active_filters'] = $this->Filter_model->get_my_active_filter();
+		$data['filtered_notes'] = $this->Filter_note_model->get_note_by_user();
 		$this->load->view('header', $data);
 		$this->load->view('map', $data);
 		$this->load->view('footer');

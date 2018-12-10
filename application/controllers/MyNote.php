@@ -42,6 +42,7 @@ class MyNote extends CI_Controller
 			'permission' => $_POST['permission'],
 			'allow_comment' => $_POST['allow_comment']);
 		$this->Note_model->add_new_note($data);
+		redirect("MyNote");
 	}
 
 	public function delete_note($note_id) {

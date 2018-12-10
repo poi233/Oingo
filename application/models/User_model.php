@@ -69,7 +69,7 @@ class User_model extends CI_Model
 		$this->session->set_userdata('user_id', $row->user_id);
 		$this->session->set_userdata('state_id', $row->state_id);
 		$this->session->set_userdata('account', $row->account);
-		$this->session->set_userdata('current_time', date("Y-m-d H:i:s"));
+		$this->session->set_userdata('current_time', date("Y-m-d")."T".date("H:i:s"));
 		$this->session->set_userdata('latitude', 40.69289);
 		$this->session->set_userdata('longitude', -73.98488);
 		$this->session->set_userdata('lastActiveTime', time());

@@ -1,7 +1,7 @@
 var noteMap = {
 	map: null,
 	myMark: null,
-	note_markers:{},
+	note_markers: {},
 	currentId: 0,
 
 	infowindow: new google.maps.InfoWindow({
@@ -22,15 +22,15 @@ var noteMap = {
 
 		this.map = new google.maps.Map(document.getElementById("note_map"), myOptions);
 
-		var myLatlng = new google.maps.LatLng(40.69289,-73.98488);
-		this.addMyMarker(myLatlng, "name","<b>My Location</b><br>" + myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5),
+		var myLatlng = new google.maps.LatLng(40.69289, -73.98488);
+		this.addMyMarker(myLatlng, "name", "<b>My Location</b><br>" + myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5),
 			myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5));
 		google.maps.event.trigger(this.myMark, 'click');
-		},
+	},
 
 	addNoteMarker: function (Gpoint, id, content) {//添加地图上的标记
 		var marker = new google.maps.Marker({
-			id: 0,
+			id: id,
 			position: Gpoint,
 			// geo: geo,
 			map: noteMap.map,
@@ -52,6 +52,13 @@ var noteMap = {
 	delNoteMarker: function (id) {//删除标记
 		this.note_markers[id].setMap(null);
 		delete this.note_markers[id];
+	},
+
+	delAllNoteMarker: function () {
+		$.each(this.note_markers, function(i, val) {
+			val.setMap(null);
+			alert(i);
+		})
 	},
 
 

@@ -67,6 +67,10 @@
 		$("#btn_modify_filter").hide();
 		$("#filter_header").text("Add New Filter");
 	}
+
+	function toggle_filter(id) {
+		window.location.href = "<?= base_url("index.php/Filter/toggle_filter/") ?>" + id;
+	}
 </script>
 <div class="container-fluid">
 	<div class="row justify-content-md-center">
@@ -79,7 +83,7 @@
 				<div class="card-body">
 					<ul class="list-group">
 						<?php foreach ($filters as $filter_row): ?>
-							<li class="list-group-item">
+							<li class="list-group-item" style="margin-bottom: 10px;">
 								<p>Start
 									Date: <?= $filter_row['start_date'] == null ? "NULL" : $filter_row['start_date'] ?>,
 									End
@@ -108,6 +112,11 @@
 								<button class="btn btn-danger" onclick="delete_filter(<?= $filter_row['filter_id'] ?>)">
 									Delete
 								</button>
+								<?php if ($filter_row['active'] == 1): ?>
+									<button class="btn btn-danger" onclick="toggle_filter(<?= $filter_row['filter_id'] ?>)">Close</button>
+								<?php else:?>
+									<button class="btn btn-success" onclick="toggle_filter(<?= $filter_row['filter_id'] ?>)">Open</button>
+								<?php endif;?>
 							</li>
 						<?php endforeach; ?>
 					</ul>
@@ -177,8 +186,7 @@
 							<div class="form-group col-md-6">
 								<label for="inputFromWho">From Who</label>
 								<select id="inputFromWho" name="from_who" class="form-control">
-									<option value="-1">Don't care.</option>
-									<option value="0">All</option>
+									<option value="0" selected="selected">All</option>
 									<option value="1">Friend</option>
 									<option value="2">Nobody</option>
 								</select>
@@ -189,7 +197,7 @@
 							<div class="form-group col-md-6">
 								<label for="inputTag">Tag</label>
 								<select id="inputTag" name="tag_id" class="form-control">
-									<option value="-1">Don't care.</option>
+									<option value="-1" selected="selected">Don't care.</option>
 									<?php foreach ($tags->result() as $tag_row): ?>
 										<option value="<?= $tag_row->tag_id ?>"><?= $tag_row->tag_name ?></option>
 									<?php endforeach; ?>
@@ -198,7 +206,7 @@
 							<div class="form-group col-md-6">
 								<label for="inputState">State</label>
 								<select id="inputState" name="state_id" class="form-control">
-									<option value="-1">Don't care.</option>
+									<option value="-1" selected="selected">Don't care.</option>
 									<?php foreach ($states->result() as $state_row): ?>
 										<option
 											value="<?= $state_row->state_id ?>"><?= $state_row->state_name ?></option>

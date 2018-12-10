@@ -85,7 +85,7 @@
 				<div class="card-body">
 					<ul class="list-group">
 						<?php foreach ($notes as $note_row): ?>
-							<li class="list-group-item">
+							<li class="list-group-item" style="margin-bottom: 10px;">
 								<p>Start Date: <?= $note_row['start_date'] ?>, End
 									Date: <?= $note_row['end_date'] ?></p>
 								<p>Start Time: <?= $note_row['start_time'] ?>, End

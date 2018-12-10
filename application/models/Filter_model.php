@@ -59,6 +59,8 @@ class Filter_model extends CI_Model
 			"repetition" => $repetition,
 			"latitude" => $data["latitude"],
 			"longitude" => $data["longitude"],
+			"tag_id" => $data["tag_id"],
+			"state_id" => $data["state_id"],
 			"from_who" => $data["from_who"]), array('filter_id' => $data['filter_id']));
 
 	}
@@ -83,6 +85,7 @@ class Filter_model extends CI_Model
 			$filter['state_id'] = $item->state_id;
 			$filter['state'] = $item->state_name;
 			$filter['from_who'] = $item->from_who;
+			$filter['active'] = $item->active;
 			array_push($data, $filter);
 		};
 		return $data;
@@ -130,6 +133,7 @@ class Filter_model extends CI_Model
 		$filter['tag_id'] = $item->tag_id;
 		$filter['state_id'] = $item->state_id;
 		$filter['from_who'] = $item->from_who;
+		$filter['active'] = $item->active;
 		return $filter;
 	}
 
@@ -140,7 +144,7 @@ class Filter_model extends CI_Model
 
 
 	public function get_my_active_filter() {
-		$filter_sql = "select * from Filter left join Tag using (tag_id) left join State using(state_id) where user_id = ? and state_id = ?";
+		$filter_sql = "select * from Filter left join Tag using (tag_id) left join State using(state_id) where user_id = ? and state_id = ? and active = 1";
 		$filters = $this->db->query($filter_sql, array($this->session->userdata("user_id"), $this->session->userdata("state_id")));
 		$data = array();
 		foreach ($filters->result() as $item) {
@@ -158,10 +162,16 @@ class Filter_model extends CI_Model
 			$filter['state_id'] = $item->state_id;
 			$filter['state'] = $item->state_name;
 			$filter['from_who'] = $item->from_who;
+			$filter['active'] = $item->active;
 			array_push($data, $filter);
 		};
 		return $data;
+	}
 
+	public function toggle_filter($id)
+	{
+		$toggle_sql = "update Filter set active=(case when (active=1) then 0 when (active=0) then 1 else 0 end) where filter_id = ?";
+		$this->db->query($toggle_sql, array($id));
 	}
 
 }
