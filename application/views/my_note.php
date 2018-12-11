@@ -56,6 +56,12 @@
 		window.location.href = "<?= base_url("index.php/MyNote/delete_note/") ?>" + note_id;
 	}
 
+	function confirm_delete_note(note_id) {
+		if (confirm("Are you sure to delete?")) {
+			delete_note(note_id);
+		}
+	}
+
 	function add_note() {
 		if (check_validation()) {
 			clear_error();
@@ -96,6 +102,12 @@
 				$("#comment_" + id).remove();
 			},
 		});
+	}
+
+	function confirm_delete_comment(id) {
+		if (confirm("Are you sure to delete?")) {
+			delete_comment(id);
+		}
 	}
 
 	function check_validation() {
@@ -221,7 +233,7 @@
 											<?= $comment->content ?> || <?= $comment->account ?>
 											|| <?= $comment->post_time ?>
 											<button type="button" class="btn-sm btn-danger"
-													onclick="delete_comment(<?= $comment->comment_id ?>)">Delete
+													onclick="confirm_delete_comment(<?= $comment->comment_id ?>)">Delete
 											</button>
 										</li>
 									<? endforeach; ?>
@@ -229,7 +241,7 @@
 								<button class="btn btn-warning" onclick="get_note_info(<?= $note_row['note_id'] ?>)">
 									Modify
 								</button>
-								<button class="btn btn-danger" onclick="delete_note(<?= $note_row['note_id'] ?>)">
+								<button class="btn btn-danger" onclick="confirm_delete_note(<?= $note_row['note_id'] ?>)">
 									Delete
 								</button>
 							</li>

@@ -67,6 +67,13 @@
 		window.location.href = "<?= base_url("index.php/Friend/delete_friend/")?>" + id;
 	}
 
+	function confirm_delete(id) {
+		var r = confirm("Are you sure to delete?");
+		if (r) {
+			decline_friend(id);
+		}
+	}
+
 </script>
 <div class="container-fluid">
 	<div class="row justify-content-md-center">
@@ -96,7 +103,7 @@
 								<?php foreach ($friends->result() as $friend_row): ?>
 									<li class="list-group-item">
 										<?= $friend_row->user_name ?>
-										<button class="btn btn-danger" style="float:right;" onclick="delete_friend(<?= $friend_row->user_id ?>)">delete</button>
+										<button class="btn btn-danger" style="float:right;" onclick="confirm_delete(<?= $friend_row->user_id ?>)">delete</button>
 									</li>
 								<?php endforeach; ?>
 							</ul>

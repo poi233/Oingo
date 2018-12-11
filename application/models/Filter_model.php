@@ -170,7 +170,8 @@ class Filter_model extends CI_Model
 		  and (Filter.start_date is NULL or Filter.start_date <= " . $this->db->escape($date) . ") and (Filter.end_date is NULL or Filter.end_date >= " . $this->db->escape($date) . ") 
 		  and (Filter.start_time is NULL or Filter.start_time <= " . $this->db->escape($time) . ") and (Filter.end_time is NULL or Filter.end_time >= " . $this->db->escape($time) . ")
 		  and (Filter.repetition is NULL or Filter.repetition like '%" . $this->db->escape_like_str($day) . "%')
-		  and Filter.active = 1";
+		  and Filter.active = 1
+		  and Filter.user_id =".$this->db->escape($user_id);
 
 
 

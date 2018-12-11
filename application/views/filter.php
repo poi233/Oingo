@@ -50,6 +50,12 @@
 		window.location.href = "<?= base_url("index.php/Filter/delete_filter/") ?>" + filter_id;
 	}
 
+	function confirm_delete(filter_id) {
+		if (confirm("Are you sure to delete?")) {
+			delete_filter(filter_id);
+		}
+	}
+
 	function add_filter() {
 		if (check_validation()) {
 			clear_error();
@@ -142,7 +148,7 @@
 										onclick="get_filter_info(<?= $filter_row['filter_id'] ?>)">
 									Modify
 								</button>
-								<button class="btn btn-danger" onclick="delete_filter(<?= $filter_row['filter_id'] ?>)">
+								<button class="btn btn-danger" onclick="confirm_delete(<?= $filter_row['filter_id'] ?>)">
 									Delete
 								</button>
 								<?php if ($filter_row['active'] == 1): ?>

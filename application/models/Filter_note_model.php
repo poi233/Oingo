@@ -62,7 +62,8 @@ class Filter_note_model extends CI_Model
 		  and (Filter.start_date is NULL or Filter.start_date <= " . $this->db->escape($date) . ") and (Filter.end_date is NULL or Filter.end_date >= " . $this->db->escape($date) . ") 
 		  and (Filter.start_time is NULL or Filter.start_time <= " . $this->db->escape($time) . ") and (Filter.end_time is NULL or Filter.end_time >= " . $this->db->escape($time) . ")
 		  and (Filter.repetition is NULL or Filter.repetition like '%" . $this->db->escape_like_str($day) . "%')
-		  and Filter.active = 1";
+		  and Filter.active = 1
+		  and Filter.user_id=".$this->db->escape($user_id);
 
 		$this->db->trans_start();
 		if ($this->db->query($candidate_filter_sql)->num_rows() == 0) {
@@ -75,13 +76,13 @@ class Filter_note_model extends CI_Model
 							select (case when user1_id = n.user_id then user2_id else user1_id end) user_id                      
 			from Friend                  
 			where (user1_id = n.user_id or user2_id = n.user_id) and status=1)))
-		and (6371000 * acos(
+		and (f.radius is null or (6371000 * acos(
 					cos( radians(n.latitude) ) 
 				  * cos( radians(f.latitude) ) 
 				  * cos( radians(f.longitude) - radians(n.longitude) ) 
 				  + sin( radians(n.latitude) ) 
 				  * sin( radians(f.latitude) )
-					)) < f.radius";
+					)) < f.radius)";
 		}
 		$notes = $this->db->query("select *
 			from Note join Schedule using(schedule_id) join Location using(location_id)

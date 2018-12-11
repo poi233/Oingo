@@ -157,13 +157,13 @@
 					</div>
 					<div class="row">
 						<div class="col-md-12">
-							<b>Last Date:</b><br/>
+							<b>Date:</b><br/>
 							<span id="noteModalDate">Date</span>
 						</div>
 					</div>
 					<div class="row">
 						<div class="col-md-12">
-							<b>Last Period:</b><br/>
+							<b>Time:</b><br/>
 							<span id="noteModalPeriod">Period</span>
 						</div>
 					</div>
