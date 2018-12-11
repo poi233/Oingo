@@ -1,6 +1,8 @@
 <script>
 	$(function () {
 		$("#btn_modify_filter").hide();
+		$("#inputDateError").hide();
+		$("#inputTimeError").hide();
 	});
 
 	function get_filter_info(filter_id) {
@@ -31,7 +33,7 @@
 				$("#lng").val(data['longitude']);
 				$("#inputTag").val(data['tag_id']);
 				$("#inputState").val(data['state_id']);
-				if (data['repetition'] != null){
+				if (data['repetition'] != null) {
 					for (j = 0, len = data['repetition'].length; j < len; j++) {
 						console.log(data['repetition'].indexOf(j));
 						$("#inputRepeat option[value='" + data['repetition'][j] + "']").prop("selected", true);
@@ -49,13 +51,19 @@
 	}
 
 	function add_filter() {
-		$("#filter_form").attr("action", "<?= base_url('index.php/Filter/add_new_filter') ?>");
-		$("#filter_form").submit();
+		if (check_validation()) {
+			clear_error();
+			$("#filter_form").attr("action", "<?= base_url('index.php/Filter/add_new_filter') ?>");
+			$("#filter_form").submit();
+		}
 	}
 
 	function modify_filter() {
-		$("#filter_form").attr("action", "<?= base_url('index.php/Filter/modify_filter') ?>");
-		$("#filter_form").submit();
+		if (check_validation()) {
+			clear_error();
+			$("#filter_form").attr("action", "<?= base_url('index.php/Filter/modify_filter') ?>");
+			$("#filter_form").submit();
+		}
 	}
 
 	function show_add_filter() {
@@ -70,6 +78,28 @@
 
 	function toggle_filter(id) {
 		window.location.href = "<?= base_url("index.php/Filter/toggle_filter/") ?>" + id;
+	}
+
+	function check_validation() {
+		var valid = true;
+		var startDate = new Date($("#inputStartDate").val());
+		var endDate =new Date($("#inputEndDate").val());
+		if (startDate != "" && endDate != "" && startDate > endDate){
+			$("#inputDateError").show();
+			valid = false;
+		}
+		var startTime = Date.parse('20 Aug 2000 '+ $("#inputStartTime").val());
+		var endTime = Date.parse('20 Aug 2000 '+$("#inputEndTime").val());
+		if (startTime != "" && endTime != "" && startTime > endTime){
+			$("#inputTimeError").show();
+			valid = false;
+		}
+		return valid;
+	}
+
+	function clear_error() {
+		$("#inputDateError").hide();
+		$("#inputTimeError").hide();
 	}
 </script>
 <div class="container-fluid">
@@ -92,9 +122,12 @@
 									Time: <?= $filter_row['start_time'] == null ? "NULL" : $filter_row['start_time'] ?>,
 									End
 									Time: <?= $filter_row['end_time'] == null ? "NULL" : $filter_row['end_time'] ?></p>
-								<p>Repetition: <?= $filter_row['repetition'] == null ? "NULL" : $filter_row['repetition'] ?></p>
+								<p>
+									Repetition: <?= $filter_row['repetition'] == null ? "NULL" : $filter_row['repetition'] ?></p>
 								<p>Coordinate: (<?= $filter_row['latitude'] ?>, <?= $filter_row['longitude'] ?>)</p>
-								<p>Radius: within <?= $filter_row['radius'] == null ? "Unlimited" : $filter_row['radius'] ?> meters</p>
+								<p>Radius:
+									within <?= $filter_row['radius'] == null ? "Unlimited" : $filter_row['radius'] ?>
+									meters</p>
 								<p>Tag: <?= $filter_row['tag_id'] == -1 ? "No tag" : $filter_row['tag'] ?></p>
 								<p>State: <?= $filter_row['state_id'] == -1 ? "No state" : $filter_row['state'] ?></p>
 								<p>From Who:
@@ -113,10 +146,14 @@
 									Delete
 								</button>
 								<?php if ($filter_row['active'] == 1): ?>
-									<button class="btn btn-danger" onclick="toggle_filter(<?= $filter_row['filter_id'] ?>)">Close</button>
-								<?php else:?>
-									<button class="btn btn-success" onclick="toggle_filter(<?= $filter_row['filter_id'] ?>)">Open</button>
-								<?php endif;?>
+									<button class="btn btn-danger"
+											onclick="toggle_filter(<?= $filter_row['filter_id'] ?>)">Close
+									</button>
+								<?php else: ?>
+									<button class="btn btn-success"
+											onclick="toggle_filter(<?= $filter_row['filter_id'] ?>)">Open
+									</button>
+								<?php endif; ?>
 							</li>
 						<?php endforeach; ?>
 					</ul>
@@ -136,6 +173,9 @@
 								<label for="inputStartDate">Start Date</label>
 								<input type="date" class="form-control" id="inputStartDate" name="start_date"
 									   placeholder="Start Date">
+								<div class="invalid-feedback" id="inputDateError">
+									Please set the right date.
+								</div>
 							</div>
 							<div class="form-group col-md-6">
 								<label for="inputEndDate">End Date</label>
@@ -148,6 +188,9 @@
 								<label for="inputStartTime">Start Time</label>
 								<input type="time" class="form-control" id="inputStartTime" name="start_time"
 									   placeholder="Start Date">
+								<div class="invalid-feedback" id="inputTimeError">
+									Please set the right time.
+								</div>
 							</div>
 							<div class="form-group col-md-6">
 								<label for="inputEndTime">End Time</label>

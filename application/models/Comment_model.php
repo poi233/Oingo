@@ -23,4 +23,9 @@ class Comment_model extends CI_Model
 		$comment_data['post_time'] = $comment->row()->post_time;
 		return $comment_data;
 	}
+
+	public function delete_comment($comment_id)
+	{
+		$this->db->query("delete from Comment where comment_id = ?", array($comment_id));
+	}
 }

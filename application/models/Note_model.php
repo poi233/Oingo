@@ -164,6 +164,9 @@ class Note_model extends CI_Model
 			$note['repetition'] = $item->repetition;
 			$tag_sql = "select tag_name from Note_Tag join Tag using(tag_id) where note_id=?";
 			$note['tag'] = $this->db->query($tag_sql, array($item->note_id));
+			$note['comment'] = $this->db->query("select distinct comment_id, account, content, post_time 
+												from Comment join User using (user_id) 
+												where note_id = ?", array($item->note_id));
 			array_push($data, $note);
 		};
 		return $data;
@@ -217,7 +220,7 @@ class Note_model extends CI_Model
 		$note['repetition'] = $item->repetition;
 		$note['tag_id'] = $this->db->query("select tag_id from Note_Tag join Tag using(tag_id) where note_id=?", array($item->note_id))->result_array();
 		$note['tag_name'] = $this->db->query("select tag_name from Note_Tag join Tag using(tag_id) where note_id=?", array($item->note_id))->result_array();
-		$note['comment'] = $this->db->query("select distinct account, content, post_time 
+		$note['comment'] = $this->db->query("select distinct comment_id, account, content, post_time 
 												from Comment join User using (user_id) 
 												where note_id = ?", array($note_id))->result_array();
 		return $note;

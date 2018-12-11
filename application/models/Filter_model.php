@@ -142,10 +142,49 @@ class Filter_model extends CI_Model
 		$this->db->query("delete from Filter where filter_id=?", array($filter_id));
 	}
 
+	function get_week($date)
+	{
+		$date_str = date('Y-m-d', strtotime($date));
+		$arr = explode("-", $date_str);
+		$year = $arr[0];
+		$month = sprintf('%02d', $arr[1]);
+		$day = sprintf('%02d', $arr[2]);
+		$hour = $minute = $second = 0;
+		$strap = mktime($hour, $minute, $second, $month, $day, $year);
+		$number_wk = date("w", $strap);
+		return $number_wk == 0 ? 7 : $number_wk;
+	}
+
 
 	public function get_my_active_filter() {
-		$filter_sql = "select * from Filter left join Tag using (tag_id) left join State using(state_id) where user_id = ? and state_id = ? and active = 1";
-		$filters = $this->db->query($filter_sql, array($this->session->userdata("user_id"), $this->session->userdata("state_id")));
+		$user_id = $this->session->userdata("user_id");
+		$state_id = $this->session->userdata("state_id");
+		$lat = $this->session->userdata("latitude");
+		$lng = $this->session->userdata("longitude");
+		list($date, $time) = explode("T", $this->session->userdata("current_time"));
+		$day = $this->get_week($date);
+
+		$candidate_filter_sql = "select *
+		from Filter left join Tag using (tag_id) left join State using(state_id)
+ 		where (Filter.state_id = -1 or Filter.state_id = 0 or (Filter.state_id = ".$this->db->escape($state_id)."))
+		  and (Filter.start_date is NULL or Filter.start_date <= " . $this->db->escape($date) . ") and (Filter.end_date is NULL or Filter.end_date >= " . $this->db->escape($date) . ") 
+		  and (Filter.start_time is NULL or Filter.start_time <= " . $this->db->escape($time) . ") and (Filter.end_time is NULL or Filter.end_time >= " . $this->db->escape($time) . ")
+		  and (Filter.repetition is NULL or Filter.repetition like '%" . $this->db->escape_like_str($day) . "%')
+		  and Filter.active = 1
+		  and (Filter.radius is NULL or (6371000 * acos( 
+					cos( radians(Filter.latitude) ) 
+				  * cos( radians( " . $this->db->escape($lat) . " ) ) 
+				  * cos( radians( " . $this->db->escape($lng) . " ) - radians(Filter.longitude) ) 
+				  + sin( radians(Filter.latitude) ) 
+				  * sin( radians( " . $this->db->escape($lat) . " ) )
+					) ) < Filter.radius)";
+
+
+
+//		$filter_sql = "select * from Filter left join Tag using (tag_id) left join State using(state_id)
+//						where user_id = ? and (state_id = -1 or state_id = ?) and active = 1";
+//		$filters = $this->db->query($filter_sql, array($this->session->userdata("user_id"), $this->session->userdata("state_id")));
+		$filters = $this->db->query($candidate_filter_sql);
 		$data = array();
 		foreach ($filters->result() as $item) {
 			$filter['filter_id'] = $item->filter_id;
@@ -170,7 +209,11 @@ class Filter_model extends CI_Model
 
 	public function toggle_filter($id)
 	{
-		$toggle_sql = "update Filter set active=(case when (active=1) then 0 when (active=0) then 1 else 0 end) where filter_id = ?";
+		$toggle_sql = "update Filter set active=(
+						case when (active=1) then 0 
+						when (active=0) then 1 
+						else 0 end) 
+						where filter_id = ?";
 		$this->db->query($toggle_sql, array($id));
 	}
 

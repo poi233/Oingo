@@ -1,9 +1,11 @@
 <script>
 	$(function () {
 		$("#btn_modify_note").hide();
+		clear_error();
 	});
 
 	function get_note_info(note_id) {
+		clear_error();
 		$("#btn_add_note").hide();
 		$("#btn_modify_note").show();
 		$("#note_header").text("Modify New Note");
@@ -55,16 +57,23 @@
 	}
 
 	function add_note() {
-		$("#note_form").attr("action", "<?= base_url('index.php/MyNote/add_new_note') ?>");
-		$("#note_form").submit();
+		if (check_validation()) {
+			clear_error();
+			$("#note_form").attr("action", "<?= base_url('index.php/MyNote/add_new_note') ?>");
+			$("#note_form").submit();
+		}
 	}
 
 	function modify_note() {
-		$("#note_form").attr("action", "<?= base_url('index.php/MyNote/modify_note') ?>");
-		$("#note_form").submit();
+		if (check_validation()) {
+			clear_error();
+			$("#note_form").attr("action", "<?= base_url('index.php/MyNote/modify_note') ?>");
+			$("#note_form").submit();
+		}
 	}
 
 	function show_add_note() {
+		clear_error();
 		$("#reset").trigger("click");
 		var myLatlng = new google.maps.LatLng(40.69289, -73.98488);
 		addNoteMap.addMarker(myLatlng, "name", "<b>Location</b><br>" + myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5),
@@ -73,6 +82,102 @@
 		$("#btn_modify_note").hide();
 		$("#note_header").text("Add New Note");
 	}
+
+	function delete_comment(id) {
+		$.ajax({
+			url: "<?= base_url("index.php/Comment/delete_comment") ?>",
+			type: "POST",
+			data: {comment_id: id},
+			dataType: 'json',
+			error: function () {
+				alert("ajax error");
+			},
+			success: function (data) {
+				$("#comment_" + id).remove();
+			},
+		});
+	}
+
+	function check_validation() {
+		var valid = true;
+		if ($("#inputStartDate").val() == "") {
+			$("#inputStartDateError").show();
+			valid = false;
+		}
+
+		if ($("#inputEndDate").val() == "") {
+			$("#inputEndDateError").show();
+			valid = false;
+		}
+
+		var startDate = new Date($("#inputStartDate").val());
+		var endDate = new Date($("#inputEndDate").val());
+		if (startDate != "" && endDate != "" && startDate > endDate) {
+			$("#inputDateError").show();
+			valid = false;
+		}
+
+		if ($("#inputStartTime").val() == "") {
+			$("#inputStartTimeError").show();
+			valid = false;
+		}
+
+		if ($("#inputEndTime").val() == "") {
+			$("#inputEndTimeError").show();
+			valid = false;
+		}
+
+		var startTime = Date.parse('20 Aug 2000 ' + $("#inputStartTime").val());
+		var endTime = Date.parse('20 Aug 2000 ' + $("#inputEndTime").val());
+		if (startTime != "" && endTime != "" && startTime > endTime) {
+			$("#inputTimeError").show();
+			valid = false;
+		}
+
+		if ($("#inputTag").val() == null) {
+			$("#inputTagError").show();
+			valid = false;
+		}
+
+		if ($("#inputRepeat").val() == null) {
+			$("#inputRepeatError").show();
+			valid = false;
+		}
+
+		if ($("#inputContent").val() == "") {
+			$("#inputContentError").show();
+			valid = false;
+		}
+
+		if ($("#inputLocationName").val() == "") {
+			$("#inputLocationNameError").show();
+			valid = false;
+		}
+
+		if ($("#inputRadius").val() == "") {
+			$("#inputRadiusError").show();
+			valid = false;
+		}
+
+
+		return valid;
+	}
+
+	function clear_error() {
+		$("#inputDateError").hide();
+		$("#inputTimeError").hide();
+		$("#inputStartDateError").hide();
+		$("#inputEndDateError").hide();
+		$("#inputStartTimeError").hide();
+		$("#inputEndTimeError").hide();
+		$("#inputTagError").hide();
+		$("#inputRepeatError").hide();
+		$("#inputContentError").hide();
+		$("#inputLocationNameError").hide();
+		$("#inputRadiusError").hide();
+	}
+
+
 </script>
 <div class="container-fluid">
 	<div class="row justify-content-md-center">
@@ -109,7 +214,18 @@
 									} else {
 										echo "Nobody";
 									} ?>
-									, allow_comment:<?= $note_row['allow_comment'] == 0 ? "True" : "False" ?></p>
+									, allow_comment:<?= $note_row['allow_comment'] == 1 ? "True" : "False" ?></p>
+								<ul class="list-group list-group-flush" id="noteModalComment">
+									<?php foreach ($note_row['comment']->result() as $comment): ?>
+										<li class="list-group-item" id="comment_<?= $comment->comment_id ?>">
+											<?= $comment->content ?> || <?= $comment->account ?>
+											|| <?= $comment->post_time ?>
+											<button type="button" class="btn-sm btn-danger"
+													onclick="delete_comment(<?= $comment->comment_id ?>)">Delete
+											</button>
+										</li>
+									<? endforeach; ?>
+								</ul>
 								<button class="btn btn-warning" onclick="get_note_info(<?= $note_row['note_id'] ?>)">
 									Modify
 								</button>
@@ -135,23 +251,41 @@
 								<label for="inputStartDate">Start Date</label>
 								<input type="date" class="form-control" id="inputStartDate" name="start_date"
 									   placeholder="Start Date">
+								<div class="invalid-feedback" id="inputStartDateError">
+									Start Date can't be empty.
+								</div>
+								<div class="invalid-feedback" id="inputDateError">
+									Please set the right date.
+								</div>
 							</div>
 							<div class="form-group col-md-6">
 								<label for="inputEndDate">End Date</label>
 								<input type="date" class="form-control" id="inputEndDate" name="end_date"
 									   placeholder="End Date">
+								<div class="invalid-feedback" id="inputEndDateError">
+									End date can't be empty.
+								</div>
 							</div>
 						</div>
 						<div class="form-row">
 							<div class="form-group col-md-6">
 								<label for="inputStartTime">Start Time</label>
 								<input type="time" class="form-control" id="inputStartTime" name="start_time"
-									   placeholder="Start Date">
+									   placeholder="Start Time">
+								<div class="invalid-feedback" id="inputStartTimeError">
+									Start time can't be empty.
+								</div>
+								<div class="invalid-feedback" id="inputTimeError">
+									Please set a right time.
+								</div>
 							</div>
 							<div class="form-group col-md-6">
 								<label for="inputEndTime">End Time</label>
 								<input type="time" class="form-control" id="inputEndTime" name="end_time"
-									   placeholder="End Date">
+									   placeholder="End Time">
+								<div class="invalid-feedback" id="inputEndTimeError">
+									End time can't be empty.
+								</div>
 							</div>
 						</div>
 						<div class="form-row">
@@ -162,6 +296,10 @@
 										<option value="<?= $tag_row->tag_id ?>"><?= $tag_row->tag_name ?></option>
 									<?php endforeach; ?>
 								</select>
+								<div class="invalid-feedback" id="inputTagError">
+									Tag can't be empty.
+								</div>
+
 							</div>
 							<div class="form-group col-md-6">
 								<label for="inputRepeat">Repeat</label>
@@ -174,6 +312,9 @@
 									<option value="6">Saturday</option>
 									<option value="7">Sunday</option>
 								</select>
+								<div class="invalid-feedback" id="inputRepeatError">
+									Repeat can't be empty.
+								</div>
 							</div>
 						</div>
 						<div class="form-row">
@@ -186,6 +327,9 @@
 							<div class="form-group col-md-6">
 								<label>Content</label>
 								<textarea class="form-control" id="inputContent" name="content" rows="10"></textarea>
+								<div class="invalid-feedback" id="inputContentError">
+									Content can't be empty.
+								</div>
 							</div>
 						</div>
 						<div class="form-row">
@@ -193,11 +337,17 @@
 								<label for="inputLocationName">Location Name</label>
 								<input type="text" class="form-control" id="inputLocationName" name="location_name"
 									   placeholder="Location Name">
+								<div class="invalid-feedback" id="inputLocationNameError">
+									Location name can't be empty.
+								</div>
 							</div>
 							<div class="form-group col-md-6">
 								<label for="inputRadius">Radius</label>
 								<input type="text" class="form-control" id="inputRadius" name="radius"
 									   placeholder="Radius">
+								<div class="invalid-feedback" id="inputRadiusError">
+									Radius can't be empty.
+								</div>
 							</div>
 						</div>
 						<div class="form-row">
@@ -212,8 +362,8 @@
 							<div class="form-group col-md-6">
 								<label for="inputAllowComment">Allow Comment</label>
 								<select id="inputAllowComment" name="allow_comment" class="form-control">
-									<option value="0">Yes</option>
-									<option value="1">No</option>
+									<option value="1">Yes</option>
+									<option value="0">No</option>
 								</select>
 							</div>
 						</div>

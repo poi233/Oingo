@@ -26,6 +26,7 @@ var noteMap = {
 		this.addMyMarker(myLatlng, "name", "<b>My Location</b><br>" + myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5),
 			myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5));
 		google.maps.event.trigger(this.myMark, 'click');
+
 	},
 
 	addNoteMarker: function (Gpoint, id, content) {//添加地图上的标记

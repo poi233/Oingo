@@ -18,4 +18,10 @@ class Comment extends CI_Controller
 		echo json_encode($this->Comment_model->make_comment($_POST));
 	}
 
+	public function delete_comment()
+	{
+		$this->Comment_model->delete_comment($_POST['comment_id']);
+		echo true;
+	}
+
 }

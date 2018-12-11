@@ -101,7 +101,10 @@
 			</div>
 			<div class="modal-body">
 				<div id="map_canvas" style="width: 100%; height: 450px"></div>
-				<input type="datetime-local" id="user_date" style="margin-top: 10px;" value=""/>
+				<input class="form-control" type="datetime-local" id="user_date" style="margin-top: 10px;" value=""/>
+				<div class="invalid-feedback" id="user_date_error">
+					Date and Time can't be empty.
+				</div>
 				<select class="form-control" id="user_state" style="margin-top: 10px;">
 					<?php foreach ($states->result() as $state_row): ?>
 						<option value="<?= $state_row->state_id ?>"
@@ -114,8 +117,7 @@
 				</select>
 			</div>
 			<div class="modal-footer">
-				<button type="button" id="btn_modal_ok" onclick="change_state()" class="btn btn-primary"
-						data-dismiss="modal" aria-hidden="true">OK
+				<button type="button" id="btn_modal_ok" onclick="change_state()" class="btn btn-primary">OK
 				</button>
 			</div>
 		</div>
@@ -187,9 +189,14 @@
 					<div class="row">
 						<div class="col-md-9">
 							<input class="form-control" id="noteModalCommentInput" placeholder="Make comments">
+							<div class="invalid-feedback" id="noteModalCommentInputError">
+								Comment can't be empty.
+							</div>
 						</div>
 						<div class="col-md-2">
-							<button class="btn-sm btn-primary" onclick="make_comment()">Comment</button>
+							<button class="btn-sm btn-primary" id="noteModalCommentButton" onclick="make_comment()">
+								Comment
+							</button>
 						</div>
 					</div>
 				</div>
@@ -206,6 +213,7 @@
 
 <script>
 	$(document).ready(function () {
+		$("#noteModalCommentInputError").hide();
 		noteMap.initialize();
 		googleMap.initialize(<?= $this->session->userdata("latitude") ?>, <?= $this->session->userdata("longitude") ?>);
 		var myLatlng = new google.maps.LatLng(<?= $this->session->userdata("latitude") ?>, <?= $this->session->userdata('longitude') ?>);
@@ -225,30 +233,36 @@
 	});
 
 	function change_state() {
-		var res = 'My Location: (' + googleMap.markers[0].getPosition().lat().toFixed(5) + ' , ' + googleMap.markers[0].getPosition().lng().toFixed(5) + ')';
-		$("#locationText").text(res);
-		var url1 = "<?= base_url("index.php/Note/set_state") ?>";
-		$.ajax({
-			url: url1,
-			type: 'POST',
-			data: {
-				user_id: <?= $this->session->userdata("user_id") ?>,
-				state_id: $("#user_state").val(),
-				latitude: googleMap.markers[0].getPosition().lat().toFixed(5),
-				longitude: googleMap.markers[0].getPosition().lng().toFixed(5),
-				current_time: $("#user_date").val()
-			},
-			dataType: 'json',
-			error: function () {
-				alert("ajax error");
-			},
-			success: function (data) {
-				window.location.href = "<?= base_url("index.php/Note") ?>";
-			}
-		});
-		var myLatlng = googleMap.markers[0].getPosition();
-		noteMap.addMyMarker(myLatlng, "name", "<b>Location</b><br>" + myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5),
-			myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5));
+		if ($("#user_date").val() == null || $("#user_date").val() == "") {
+			$("#user_date_error").show();
+		} else {
+			$("#user_date_error").hide();
+			var res = 'My Location: (' + googleMap.markers[0].getPosition().lat().toFixed(5) + ' , ' + googleMap.markers[0].getPosition().lng().toFixed(5) + ')';
+			$("#locationText").text(res);
+			var url1 = "<?= base_url("index.php/Note/set_state") ?>";
+			$.ajax({
+				url: url1,
+				type: 'POST',
+				data: {
+					user_id: <?= $this->session->userdata("user_id") ?>,
+					state_id: $("#user_state").val(),
+					latitude: googleMap.markers[0].getPosition().lat().toFixed(5),
+					longitude: googleMap.markers[0].getPosition().lng().toFixed(5),
+					current_time: $("#user_date").val()
+				},
+				dataType: 'json',
+				error: function () {
+					alert("ajax error");
+				},
+				success: function (data) {
+					window.location.href = "<?= base_url("index.php/Note") ?>";
+				}
+			});
+			var myLatlng = googleMap.markers[0].getPosition();
+			noteMap.addMyMarker(myLatlng, "name", "<b>Location</b><br>" + myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5),
+				myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5));
+			$("#google_maps_api").modal("hide");
+		}
 	}
 
 	function show_filtered_notes() {
@@ -309,8 +323,8 @@
 					tags = tags + data['tag_name'][j]['tag_name'] + " ";
 				}
 				$("#noteModalTag").text(tags);
-				$("#noteModalDate").text(data['start_date'] + " - " + data['end_date']);
-				$("#noteModalPeriod").text(data['start_time'] + " - " + data['end_time']);
+				$("#noteModalDate").text(data['start_date'] + " ~ " + data['end_date']);
+				$("#noteModalPeriod").text(data['start_time'] + " ~ " + data['end_time']);
 				$("#noteModalRepeat").text(data['repetition']);
 				$("#noteModalComment").empty();
 				for (i = 0, len = data['comment'].length; i < len; i++) {
@@ -321,6 +335,14 @@
 						"</li>";
 					$("#noteModalComment").append(content);
 				}
+				if (data['allow_comment'] == 1) {
+					$("#noteModalCommentInput").removeAttr("disabled");
+					$("#noteModalCommentButton").removeAttr("disabled");
+				} else {
+					$("#noteModalCommentInput").attr("disabled", "disabled");
+					$("#noteModalCommentButton").attr("disabled", "disabled");
+
+				}
 
 				$("#note_modal").modal("show");
 
@@ -329,6 +351,11 @@
 	}
 
 	function make_comment() {
+		if ($("#noteModalCommentInput").val() == "") {
+			$("#noteModalCommentInputError").show();
+			return;
+		}
+		$("#noteModalCommentInputError").hide();
 		var comment_url = "<?= base_url('index.php/Comment/make_comment') ?>";
 		$.ajax({
 			url: comment_url,
@@ -355,16 +382,20 @@
 		});
 
 	}
-
 </script>
 
 <script>
 	$("#google_maps_api").on("shown.bs.modal", function () {
+		$("#user_date_error").hide();
 		$("#user_date").val("<?= $this->session->userdata("current_time")?>");
 		googleMap.delMarker();
 		var myLatlng = new google.maps.LatLng(<?= $this->session->userdata("latitude") ?>, <?= $this->session->userdata('longitude') ?>);
 		googleMap.addMarker(myLatlng, "name", "<b>Location</b><br>" + myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5),
 			myLatlng.lat().toFixed(5) + "," + myLatlng.lng().toFixed(5));
+	});
+
+	$("#note_modal").on("hide.bs.modal", function () {
+		$("#noteModalCommentInputError").hide();
 	});
 </script>
 

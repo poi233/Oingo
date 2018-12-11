@@ -29,6 +29,7 @@ class Filter_note_model extends CI_Model
 	public function get_note_by_user()
 	{
 		$user_id = $this->session->userdata("user_id");
+		$state_id = $this->session->userdata("state_id");
 		$lat = $this->session->userdata("latitude");
 		$lng = $this->session->userdata("longitude");
 		list($date, $time) = explode("T", $this->session->userdata("current_time"));
@@ -47,7 +48,7 @@ class Filter_note_model extends CI_Model
 												  				or user2_id = " . $this->db->escape_str($user_id) . ") and status=1) 
 												  				or Note.user_id = " . $this->db->escape_str($user_id) . "
 																)))
-		  and (6371000 * acos( 
+		  and (6371000 * acos(
 					cos( radians(Location.latitude) ) 
 				  * cos( radians( " . $this->db->escape($lat) . " ) ) 
 				  * cos( radians( " . $this->db->escape($lng) . " ) - radians(Location.longitude) ) 
@@ -56,8 +57,8 @@ class Filter_note_model extends CI_Model
 					)) < Note.radius";
 
 		$candidate_filter_sql = "select Filter.tag_id, Filter.from_who
-		from Filter join User using (user_id)
- 		where (Filter.state_id = -1 or Filter.state_id = 0 or (User.user_id = " . $this->db->escape_str($user_id) . " and User.state_id = Filter.state_id))
+		from Filter left join Tag using (tag_id) left join State using(state_id)
+ 		where (Filter.state_id = -1 or Filter.state_id = 0 or (Filter.state_id = ".$this->db->escape($state_id)."))
 		  and (Filter.start_date is NULL or Filter.start_date <= " . $this->db->escape($date) . ") and (Filter.end_date is NULL or Filter.end_date >= " . $this->db->escape($date) . ") 
 		  and (Filter.start_time is NULL or Filter.start_time <= " . $this->db->escape($time) . ") and (Filter.end_time is NULL or Filter.end_time >= " . $this->db->escape($time) . ")
 		  and (Filter.repetition is NULL or Filter.repetition like '%" . $this->db->escape_like_str($day) . "%')
