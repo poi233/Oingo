@@ -170,14 +170,7 @@ class Filter_model extends CI_Model
 		  and (Filter.start_date is NULL or Filter.start_date <= " . $this->db->escape($date) . ") and (Filter.end_date is NULL or Filter.end_date >= " . $this->db->escape($date) . ") 
 		  and (Filter.start_time is NULL or Filter.start_time <= " . $this->db->escape($time) . ") and (Filter.end_time is NULL or Filter.end_time >= " . $this->db->escape($time) . ")
 		  and (Filter.repetition is NULL or Filter.repetition like '%" . $this->db->escape_like_str($day) . "%')
-		  and Filter.active = 1
-		  and (Filter.radius is NULL or (6371000 * acos( 
-					cos( radians(Filter.latitude) ) 
-				  * cos( radians( " . $this->db->escape($lat) . " ) ) 
-				  * cos( radians( " . $this->db->escape($lng) . " ) - radians(Filter.longitude) ) 
-				  + sin( radians(Filter.latitude) ) 
-				  * sin( radians( " . $this->db->escape($lat) . " ) )
-					) ) < Filter.radius)";
+		  and Filter.active = 1";
 
 
 
