@@ -15,14 +15,18 @@ class Filter extends CI_Controller
 
 	public function index()
 	{
-		$data['title'] = 'Filter';
-		$data['tags'] = $this->Note_model->get_tags();
-		$data['friends'] = $this->Friend_model->get_my_friends();
-		$data['states'] = $this->Note_model->get_states();
-		$data['filters'] = $this->Filter_model->get_my_filter();
-		$this->load->view('header', $data);
-		$this->load->view('filter', $data);
-		$this->load->view('footer');
+		if ($this->session->userdata("user_id") == null) {
+			redirect("");
+		} else {
+			$data['title'] = 'Filter';
+			$data['tags'] = $this->Note_model->get_tags();
+			$data['friends'] = $this->Friend_model->get_my_friends();
+			$data['states'] = $this->Note_model->get_states();
+			$data['filters'] = $this->Filter_model->get_my_filter();
+			$this->load->view('header', $data);
+			$this->load->view('filter', $data);
+			$this->load->view('footer');
+		}
 	}
 
 	public function add_new_filter()
@@ -65,10 +69,10 @@ class Filter extends CI_Controller
 			'end_time' => $_POST['end_time'] != "" ? $_POST['end_time'] : NULL,
 			'tag_id' => $_POST['tag_id'],
 			'state_id' => $_POST['state_id'],
-			'repetition' => array_key_exists('repetition', $_POST) ? $_POST['repetition'] : null,
+			'repetition' => array_key_exists('repetition', $_POST) ? $_POST['repetition'] : NULL,
 			'latitude' => $_POST['latitude'],
 			'longitude' => $_POST['longitude'],
-			'radius' => array_key_exists('radius', $_POST) ? null : $_POST['radius'],
+			'radius' => $_POST['radius'] <= 0 ? NULL : $_POST['radius'],
 			'from_who' => $_POST['from_who'],);
 		$this->Filter_model->modify_filter($data);
 		redirect("Filter");

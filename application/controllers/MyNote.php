@@ -15,13 +15,17 @@ class MyNote extends CI_Controller
 
 	public function index()
 	{
-		$data['title'] = 'My Note';
-		$data['tags'] = $this->Note_model->get_tags();
-		$data['notes'] = $this->Note_model->get_my_Note();
-		$data['friends'] = $this->Friend_model->get_my_friends();
-		$this->load->view('header', $data);
-		$this->load->view('my_note', $data);
-		$this->load->view('footer');
+		if ($this->session->userdata("user_id") == null) {
+			redirect("");
+		} else {
+			$data['title'] = 'My Note';
+			$data['tags'] = $this->Note_model->get_tags();
+			$data['notes'] = $this->Note_model->get_my_Note();
+			$data['friends'] = $this->Friend_model->get_my_friends();
+			$this->load->view('header', $data);
+			$this->load->view('my_note', $data);
+			$this->load->view('footer');
+		}
 
 	}
 
@@ -45,17 +49,20 @@ class MyNote extends CI_Controller
 		redirect("MyNote");
 	}
 
-	public function delete_note($note_id) {
+	public function delete_note($note_id)
+	{
 		$this->Note_model->delete_note($note_id);
 		redirect("MyNote");
 	}
 
-	public function get_note_info() {
+	public function get_note_info()
+	{
 		$note = $this->Note_model->get_note_by_id($_POST['note_id']);
 		echo json_encode($note);
 	}
 
-	public function modify_note() {
+	public function modify_note()
+	{
 		$data = array(
 			'note_id' => $_POST['note_id'],
 			'start_date' => $_POST['start_date'],

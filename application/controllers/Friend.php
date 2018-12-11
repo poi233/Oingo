@@ -15,12 +15,16 @@ class Friend extends CI_Controller
 
 	public function index()
 	{
-		$data['title'] = 'Friend';
-		$data['friends'] = $this->Friend_model->get_my_friends();
-		$data['invite_message'] = $this->Friend_model->get_invite_message();
-		$this->load->view('header', $data);
-		$this->load->view('friend', $data);
-		$this->load->view('footer');
+		if ($this->session->userdata("user_id") == null) {
+			redirect("");
+		} else {
+			$data['title'] = 'Friend';
+			$data['friends'] = $this->Friend_model->get_my_friends();
+			$data['invite_message'] = $this->Friend_model->get_invite_message();
+			$this->load->view('header', $data);
+			$this->load->view('friend', $data);
+			$this->load->view('footer');
+		}
 
 	}
 

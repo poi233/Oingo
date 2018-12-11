@@ -133,37 +133,63 @@
 				</button>
 			</div>
 			<div class="modal-body">
+				<div hidden="hidden" id="noteModalNoteId"></div>
 				<div class="container-fluid">
 					<div class="row">
 						<div class="col-md-12">
-							<b>Location Name</b>
+							<b>Location:</b><br/>
+							<span id="noteModalLocation">Location Name</span>
 						</div>
 					</div>
 					<div class="row">
 						<div class="col-md-12">
-							This is the content of a note.
+							<b>Content:</b><br/>
+							<span id="noteModalContent">This is the content of a note.</span>
 						</div>
 					</div>
 					<div class="row">
-						<div class="col-md-4">
-							publisher_name
-						</div>
-						<div class="col-md-offset-4">
-							<button type="button" class="btn-sm btn-success">Add Friend</button>
+						<div class="col-md-12">
+							<b>Publisher:</b><br/>
+							<span id="noteModalAccount">publisher_name</span>
 						</div>
 					</div>
 					<div class="row">
-						<ul class="col-md-12 list-group">
-							<li class="list-group-item">comment1</li>
-							<li class="list-group-item">comment1</li>
-						</ul>
+						<div class="col-md-12">
+							<b>Last Date:</b><br/>
+							<span id="noteModalDate">Date</span>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<b>Last Period:</b><br/>
+							<span id="noteModalPeriod">Period</span>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<b>Repeat:</b><br/>
+							<span id="noteModalRepeat">Repeat</span>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<b>Tags:</b><br/>
+							<span id="noteModalTag">#tag1 #tag2</span>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<b>Comments:</b><br/>
+							<ul class="list-group list-group-flush" id="noteModalComment">
+							</ul>
+						</div>
 					</div>
 					<div class="row">
 						<div class="col-md-9">
-							<input class="form-control" id="inputSearch" placeholder="Make comments">
+							<input class="form-control" id="noteModalCommentInput" placeholder="Make comments">
 						</div>
-						<div class="col-md-3">
-							<button class="btn btn-primary" onclick="">Comment</button>
+						<div class="col-md-2">
+							<button class="btn-sm btn-primary" onclick="make_comment()">Comment</button>
 						</div>
 					</div>
 				</div>
@@ -261,7 +287,73 @@
 	}
 
 	function show_note_detail(id) {
-		$("#note_modal").modal("show");
+		var info_url = "<?= base_url('index.php/Note/get_note_info') ?>";
+		$.ajax({
+			url: info_url,
+			type: 'POST',
+			data: {
+				note_id: id,
+			},
+			dataType: 'json',
+			error: function () {
+				alert("ajax error");
+			},  //错误执行方法
+			success: function (data) {
+				var data = eval(data);
+				$("#noteModalNoteId").text(data['note_id']);
+				$("#noteModalLocation").text(data['location_name']);
+				$("#noteModalContent").text(data['content']);
+				$("#noteModalAccount").text(data['account']);
+				var tags = "";
+				for (j = 0, len = data['tag_id'].length; j < len; j++) {
+					tags = tags + data['tag_name'][j]['tag_name'] + " ";
+				}
+				$("#noteModalTag").text(tags);
+				$("#noteModalDate").text(data['start_date'] + " - " + data['end_date']);
+				$("#noteModalPeriod").text(data['start_time'] + " - " + data['end_time']);
+				$("#noteModalRepeat").text(data['repetition']);
+				$("#noteModalComment").empty();
+				for (i = 0, len = data['comment'].length; i < len; i++) {
+					var content = "<li class='list-group-item'>" +
+						data['comment'][i]['content'] + "<br/>" +
+						data['comment'][i]['account'] + " " +
+						data['comment'][i]['post_time'] +
+						"</li>";
+					$("#noteModalComment").append(content);
+				}
+
+				$("#note_modal").modal("show");
+
+			} //成功执行方法
+		});
+	}
+
+	function make_comment() {
+		var comment_url = "<?= base_url('index.php/Comment/make_comment') ?>";
+		$.ajax({
+			url: comment_url,
+			type: 'POST',
+			data: {
+				note_id: $("#noteModalNoteId").text(),
+				user_id: <?= $this->session->userdata("user_id") ?>,
+				content: $("#noteModalCommentInput").val(),
+			},
+			dataType: 'json',
+			error: function () {
+				alert("ajax error");
+			},  //错误执行方法
+			success: function (data) {
+				var data = eval(data);
+				$("#noteModalCommentInput").val("");
+				var content = "<li class='list-group-item'>" +
+					data['content'] + "<br/>" +
+					data['account'] + " " +
+					data['post_time'] +
+					"</li>";
+				$("#noteModalComment").append(content);
+			} //成功执行方法
+		});
+
 	}
 
 </script>

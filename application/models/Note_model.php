@@ -202,6 +202,7 @@ class Note_model extends CI_Model
 			where note_id=?", array($note_id));
 		$item = $note_search->row();
 		$note['note_id'] = $item->note_id;
+		$note['account'] = $this->db->query("select account from User where user_id = ?", array($item->user_id))->row()->account;
 		$note['radius'] = $item->radius;
 		$note['start_time'] = $item->start_time;
 		$note['end_time'] = $item->end_time;
@@ -215,6 +216,10 @@ class Note_model extends CI_Model
 		$note['allow_comment'] = $item->allow_comment;
 		$note['repetition'] = $item->repetition;
 		$note['tag_id'] = $this->db->query("select tag_id from Note_Tag join Tag using(tag_id) where note_id=?", array($item->note_id))->result_array();
+		$note['tag_name'] = $this->db->query("select tag_name from Note_Tag join Tag using(tag_id) where note_id=?", array($item->note_id))->result_array();
+		$note['comment'] = $this->db->query("select distinct account, content, post_time 
+												from Comment join User using (user_id) 
+												where note_id = ?", array($note_id))->result_array();
 		return $note;
 	}
 
@@ -226,7 +231,6 @@ class Note_model extends CI_Model
 									where note_id=?", array($note_id));
 		$schedule_id = $to_delete->row()->schedule_id;
 		$location_id = $to_delete->row()->location_id;
-
 		$this->db->query("delete from Location where location_id=?", array($location_id));
 		$this->db->query("delete from Schedule where schedule_id=?", array($schedule_id));
 		$this->db->query("delete from Note where note_id=?", array($note_id));

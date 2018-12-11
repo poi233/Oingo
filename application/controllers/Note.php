@@ -11,17 +11,20 @@ class Note extends CI_Controller
 
 	public function index()
 	{
-		$data['title'] = 'Note';
-		$data['states'] = $this->Note_model->get_states();
-		$data['current_state'] = $this->Note_model->get_current_state();
-		$data['notes'] = $this->Note_model->get_all_note();
-		$data['friends'] = $this->Friend_model->get_my_friends();
-		$data['active_filters'] = $this->Filter_model->get_my_active_filter();
-		$data['filtered_notes'] = $this->Filter_note_model->get_note_by_user();
-		$this->load->view('header', $data);
-		$this->load->view('map', $data);
-		$this->load->view('footer');
-
+		if ($this->session->userdata("user_id") == null) {
+			redirect("");
+		} else {
+			$data['title'] = 'Note';
+			$data['states'] = $this->Note_model->get_states();
+			$data['current_state'] = $this->Note_model->get_current_state();
+			$data['notes'] = $this->Note_model->get_all_note();
+			$data['friends'] = $this->Friend_model->get_my_friends();
+			$data['active_filters'] = $this->Filter_model->get_my_active_filter();
+			$data['filtered_notes'] = $this->Filter_note_model->get_note_by_user();
+			$this->load->view('header', $data);
+			$this->load->view('map', $data);
+			$this->load->view('footer');
+		}
 	}
 
 	public function get_state()
@@ -40,6 +43,13 @@ class Note extends CI_Controller
 		$this->User_model->insert_record($data);
 		echo TRUE;
 	}
+
+	public function get_note_info()
+	{
+		$note = $this->Note_model->get_note_by_id($_POST['note_id']);
+		echo json_encode($note);
+	}
+
 
 
 }

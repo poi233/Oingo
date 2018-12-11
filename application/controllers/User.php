@@ -15,13 +15,17 @@ class User extends CI_Controller
 
 	public function index()
 	{
-		$data['title'] = 'Profile';
-		$data['states'] = $this->Note_model->get_states();
-		$data['user_info'] = $this->User_model->get_by_id($this->session->userdata("user_id"))->row();
-		$data['friends'] = $this->Friend_model->get_my_friends();
-		$this->load->view('header', $data);
-		$this->load->view('profile', $data);
-		$this->load->view('footer');
+		if ($this->session->userdata("user_id") == null) {
+			redirect("");
+		} else {
+			$data['title'] = 'Profile';
+			$data['states'] = $this->Note_model->get_states();
+			$data['user_info'] = $this->User_model->get_by_id($this->session->userdata("user_id"))->row();
+			$data['friends'] = $this->Friend_model->get_my_friends();
+			$this->load->view('header', $data);
+			$this->load->view('profile', $data);
+			$this->load->view('footer');
+		}
 	}
 
 	public function update()

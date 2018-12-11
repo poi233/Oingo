@@ -13,5 +13,9 @@ class Comment extends CI_Controller
 		parent::__construct();
 	}
 
+	public function make_comment()
+	{
+		echo json_encode($this->Comment_model->make_comment($_POST));
+	}
 
 }
